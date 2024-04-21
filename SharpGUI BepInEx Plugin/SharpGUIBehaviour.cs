@@ -40,18 +40,12 @@ public class SharpGUIBehaviour(IntPtr basePtr) : MonoBehaviour(basePtr)
 
 		if (!showGui)
 		{
-			
 			DrawIntro();
-			
-
 			return;
 		}
 
 		if (!ImGui.Begin("SharpGUI"))
 			return;
-
-		ImGui.Text("lockstate: " + Enum.GetName(Cursor.lockState));
-		ImGui.Text("visible: " + Cursor.visible);
 
 		ImGui.Text("Count: " + counter.ToString());
 

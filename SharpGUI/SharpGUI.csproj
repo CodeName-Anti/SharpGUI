@@ -28,6 +28,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SharpGUINative\SharpGUINative.vcxproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="ImGui.NET">
       <HintPath>Resources/ImGui.NET.dll</HintPath>
     </Reference>

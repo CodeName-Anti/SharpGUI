@@ -7,14 +7,20 @@ internal class SharpGUINatives
 
 	[DllImport("SharpGUINative.dll")]
 	internal static extern bool InitializeSharpGUI();
+	
+	[DllImport("SharpGUINative.dll")]
+	internal static extern bool InitializeSharpGUIBackend(BackendType backendType);
 
 	[DllImport("SharpGUINative.dll")]
 	internal static extern bool ShutdownSharpGUI();
 
 	[DllImport("SharpGUINative.dll")]
-	internal static extern bool SetInitImGuiCallback(IntPtr initImGuiCallback);
+	internal static extern void SetInitImGuiCallback(IntPtr initImGuiCallback);
 
 	[DllImport("SharpGUINative.dll")]
-	internal static extern bool SetRenderCallback(IntPtr renderCallback);
+	internal static extern void SetRenderCallback(IntPtr renderCallback);
+
+	[DllImport("SharpGUINative.dll")]
+	internal static extern void SetHandleInput([MarshalAs(UnmanagedType.Bool)] bool handleInput);
 
 }

@@ -5,18 +5,19 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="Resources\cimgui.dll" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\cimgui.dll" />
-  </ItemGroup>
+  <PropertyGroup Condition="$(Configuration) == Debug">
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="..\x64\$(Configuration)\SharpGUINative.dll" Link="Resources\SharpGUINative.dll">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\SharpGUINative\cimgui\cimgui.dll" Link="Resources\cimgui.dll" />
   </ItemGroup>
 
   <ItemGroup>

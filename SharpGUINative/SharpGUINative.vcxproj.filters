@@ -56,7 +56,7 @@
     <ClCompile Include="kiero\minhook\src\hde\hde64.c">
       <Filter>kiero\minhook\src\hde</Filter>
     </ClCompile>
-    <ClCompile Include="exports.cpp">
+    <ClCompile Include="sharpgui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Logger\logger.cpp">
@@ -75,6 +75,12 @@
       <Filter>Source Files\backends</Filter>
     </ClCompile>
     <ClCompile Include="backends\dx9_backend.cpp">
+      <Filter>Source Files\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="exports.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="backends\overlay_backend.cpp">
       <Filter>Source Files\backends</Filter>
     </ClCompile>
   </ItemGroup>
@@ -137,6 +143,12 @@
       <Filter>Header Files\backends</Filter>
     </ClInclude>
     <ClInclude Include="backends\dx9_backend.hpp">
+      <Filter>Header Files\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="sharpgui.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="backends\overlay_backend.hpp">
       <Filter>Header Files\backends</Filter>
     </ClInclude>
   </ItemGroup>

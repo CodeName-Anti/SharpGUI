@@ -31,17 +31,17 @@ namespace Backends::OpenGL
 	bool newOpenGL = false;
 	
 	WglSwapBuffersFunc* swapBuffersAddress = NULL;
-}
+	WglSwapBuffersFunc oWglSwapBuffers;
 
-WglSwapBuffersFunc oWglSwapBuffers;
-HGLRC wglContext;
+	HGLRC wglContext;
+}
 
 bool __stdcall hkWglSwapBuffers(HDC hDc)
 {
 	if (!Backends::OpenGL::initHook)
 	{
 		if (WindowFromDC(hDc) == Backends::OpenGL::window)
-			return oWglSwapBuffers(hDc);
+			return Backends::OpenGL::oWglSwapBuffers(hDc);
 
 		Backends::OpenGL::window = WindowFromDC(hDc);
 
@@ -74,14 +74,14 @@ bool __stdcall hkWglSwapBuffers(HDC hDc)
 			ImGui_ImplOpenGL2_Init();
 		}
 
-		wglContext = wglCreateContext(hDc);
+		Backends::OpenGL::wglContext = wglCreateContext(hDc);
 
 		Backends::OpenGL::initHook = true;
 	}
 
 	HGLRC originalWglContext = wglGetCurrentContext();
 
-	wglMakeCurrent(hDc, wglContext);
+	wglMakeCurrent(hDc, Backends::OpenGL::wglContext);
 
 	if (Backends::OpenGL::newOpenGL)
 		ImGui_ImplOpenGL3_NewFrame();
@@ -103,7 +103,7 @@ bool __stdcall hkWglSwapBuffers(HDC hDc)
 
 	wglMakeCurrent(hDc, originalWglContext);
 
-	return oWglSwapBuffers(hDc);
+	return Backends::OpenGL::oWglSwapBuffers(hDc);
 }
 
 WglSwapBuffersFunc* GetWglSwapBuffers()
@@ -121,6 +121,8 @@ void Backends::OpenGL::Initialize()
 
 	Backends::OpenGL::swapBuffersAddress = GetWglSwapBuffers();
 
+	MH_Initialize();
+
 	MH_CreateHook(Backends::OpenGL::swapBuffersAddress, hkWglSwapBuffers, (void**)&oWglSwapBuffers);
 	MH_EnableHook(Backends::OpenGL::swapBuffersAddress);
 
@@ -134,6 +136,8 @@ void Backends::OpenGL::Shutdown()
 
 	MH_DisableHook(Backends::OpenGL::swapBuffersAddress);
 	MH_RemoveHook(Backends::OpenGL::swapBuffersAddress);
+
+	MH_Uninitialize();
 
 	if (Backends::OpenGL::newOpenGL)
 	{

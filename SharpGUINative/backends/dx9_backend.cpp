@@ -9,17 +9,17 @@
 #define CIMGUI_USE_DX9
 #include "cimgui/cimgui_impl.h"
 
+typedef HRESULT(__stdcall* EndSceneFunc)(IDirect3DDevice9* pDevice);
+typedef HRESULT(__stdcall* ResetFunc)(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters);
+
 namespace Backends::DX9
 {
 	bool initialized = false;
 	bool hookInit = false;
+
+	EndSceneFunc oEndScene;
+	ResetFunc oReset;
 }
-
-typedef HRESULT(__stdcall* EndSceneFunc)(IDirect3DDevice9* pDevice);
-typedef HRESULT(__stdcall* ResetFunc)(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters);
-
-EndSceneFunc oEndScene;
-ResetFunc oReset;
 
 HRESULT __stdcall hkEndScene(IDirect3DDevice9* pDevice)
 {
@@ -46,14 +46,14 @@ HRESULT __stdcall hkEndScene(IDirect3DDevice9* pDevice)
 
 	ImGui_ImplDX9_RenderDrawData(igGetDrawData());
 
-	return oEndScene(pDevice);
+	return Backends::DX9::oEndScene(pDevice);
 }
 
 HRESULT __stdcall hkReset(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters)
 {
 	ImGui_ImplDX9_InvalidateDeviceObjects();
 
-	HRESULT hr = oReset(pDevice, pPresentationParameters);
+	HRESULT hr = Backends::DX9::oReset(pDevice, pPresentationParameters);
 
 	ImGui_ImplDX9_CreateDeviceObjects();
 
@@ -65,6 +65,7 @@ void Backends::DX9::Initialize()
 	if (initialized)
 		return;
 
+	kiero::init(kiero::RenderType::D3D9);
 	kiero::bind(42, (void**)&oEndScene, hkEndScene);
 	kiero::bind(16, (void**)&oReset, hkReset);
 	initialized = true;

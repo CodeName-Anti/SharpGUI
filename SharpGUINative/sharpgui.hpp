@@ -4,12 +4,15 @@
 
 namespace SharpGUI
 {
-	Backends::BackendType::Enum GetBackendType();
+	Backends::BackendType GetBackendType();
 
-	Backends::BackendType::Enum GetCurrentBackend();
+	Backends::BackendType GetCurrentBackend();
 
-	bool Initialize(Backends::BackendType::Enum backendType);
+	bool Initialize(Backends::BackendType backendType);
 	bool Initialize();
 
 	bool Shutdown();
+
+	void SetHandleInput(bool handleInput);
+	bool GetHandleInput();
 }

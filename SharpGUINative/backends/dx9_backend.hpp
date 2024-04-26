@@ -4,12 +4,17 @@
 
 #if SHARPGUI_INCLUDE_DX9
 
-namespace Backends::DX9
+namespace Backends
 {
-	extern bool initialized;
+	class DX9Backend : public Backend
+	{
+	public:
+		Backends::BackendType GetType() override;
 
-	void Initialize();
-	void Shutdown();
+	protected:
+		void InitializeBackend() override;
+		void ShutdownBackend() override;
+	};
 }
 
 #endif

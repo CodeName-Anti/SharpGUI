@@ -3,6 +3,8 @@
 #if SHARPGUI_INCLUDE_OPENGL
 
 #include "backends.hpp"
+#include "opengl_backend.hpp"
+#include "win32_backend.hpp"
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -114,26 +116,24 @@ WglSwapBuffersFunc* GetWglSwapBuffers()
 	return (WglSwapBuffersFunc*)GetProcAddress(hMod, "wglSwapBuffers");
 }
 
-void Backends::OpenGL::Initialize()
+Backends::BackendType Backends::OpenGLBackend::GetType()
 {
-	if (initialized)
-		return;
+	return Backends::BackendType_OpenGL;
+}
 
+void Backends::OpenGLBackend::InitializeBackend()
+{
 	Backends::OpenGL::swapBuffersAddress = GetWglSwapBuffers();
 
 	MH_Initialize();
 
-	MH_CreateHook(Backends::OpenGL::swapBuffersAddress, hkWglSwapBuffers, (void**)&oWglSwapBuffers);
+	MH_CreateHook(Backends::OpenGL::swapBuffersAddress, hkWglSwapBuffers, (void**)&Backends::OpenGL::oWglSwapBuffers);
 	MH_EnableHook(Backends::OpenGL::swapBuffersAddress);
 
-	initialized = true;
 }
 
-void Backends::OpenGL::Shutdown()
+void Backends::OpenGLBackend::ShutdownBackend()
 {
-	if (!initialized)
-		return;
-
 	MH_DisableHook(Backends::OpenGL::swapBuffersAddress);
 	MH_RemoveHook(Backends::OpenGL::swapBuffersAddress);
 
@@ -148,13 +148,12 @@ void Backends::OpenGL::Shutdown()
 		ImGui_ImplOpenGL2_Shutdown();
 	}
 
-	wglDeleteContext(wglContext);
+	wglDeleteContext(Backends::OpenGL::wglContext);
 
 	Backends::Win32::Shutdown();
 
 	Backends::ShutdownImGui();
 
 	Backends::OpenGL::initHook = false;
-	initialized = false;
 }
 #endif

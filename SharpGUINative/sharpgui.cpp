@@ -5,14 +5,15 @@
 #include "kiero.h"
 #include "backends/backends.hpp"
 
-namespace SharpGUI
-{
-	Backends::BackendType::Enum currentBackend;
-}
+#include "backends/dx9_backend.hpp"
+#include "backends/dx11_backend.hpp"
+#include "backends/win32_backend.hpp"
+#include "backends/opengl_backend.hpp"
+#include "backends/overlay_backend.hpp"
 
-Backends::BackendType::Enum SharpGUI::GetBackendType()
+Backends::BackendType SharpGUI::GetBackendType()
 {
-	Backends::BackendType::Enum type = Backends::BackendType::None;
+	Backends::BackendType type = Backends::BackendType::BackendType_None;
 
 
 #define CHECK_FOR_DLL(dll, backendEnum)				\
@@ -22,67 +23,73 @@ Backends::BackendType::Enum SharpGUI::GetBackendType()
 	}
 
 #if SHARPGUI_INCLUDE_OPENGL
-	CHECK_FOR_DLL("opengl32.dll", Backends::BackendType::OpenGL);
+	CHECK_FOR_DLL("opengl32.dll", Backends::BackendType::BackendType_OpenGL);
 #endif
 
 #if SHARPGUI_INCLUDE_DX9
-	CHECK_FOR_DLL("d3d9.dll", Backends::BackendType::DX9);
+	CHECK_FOR_DLL("d3d9.dll", Backends::BackendType::BackendType_DX9);
 #endif
 
 #if SHARPGUI_INCLUDE_DX11
-	CHECK_FOR_DLL("d3d11.dll", Backends::BackendType::DX11);
+	CHECK_FOR_DLL("d3d11.dll", Backends::BackendType::BackendType_DX11);
 #endif
 
 #undef CHECK_FOR_DLL
 
 #if SHARPGUI_INCLUDE_OVERLAY
-	if (type == Backends::BackendType::None)
+	if (type == Backends::BackendType::BackendType_None)
 	{
-		type = Backends::BackendType::Overlay;
+		type = Backends::BackendType::BackendType_Overlay;
 	}
 #endif
 
 	return type;
 }
 
-Backends::BackendType::Enum SharpGUI::GetCurrentBackend()
+Backends::BackendType SharpGUI::GetCurrentBackend()
 {
-	return SharpGUI::currentBackend;
+	if (Backends::currentBackend == nullptr)
+		return Backends::BackendType_None;
+
+	return Backends::currentBackend->GetType();
 }
 
-bool SharpGUI::Initialize(Backends::BackendType::Enum backendType)
+Backends::Backend* GetBackend(Backends::BackendType type)
 {
-	switch (backendType)
+	Backends::Backend* backendInstance = nullptr;
+
+#define CHECK_TYPE(enumName, className)									\
+case enumName:															\
+	backendInstance = (Backends::Backend*)new className();				\
+	break;																\
+
+	switch (type)
 	{
-#if SHARPGUI_INCLUDE_DX9
-	case Backends::BackendType::DX9:
-		Backends::DX9::Initialize();
-		break;
-#endif
-
-#if SHARPGUI_INCLUDE_DX11
-	case Backends::BackendType::DX11:
-		Backends::DX11::Initialize();
-		break;
-#endif
-
-#if SHARPGUI_INCLUDE_OPENGL
-	case Backends::BackendType::OpenGL:
-		Backends::OpenGL::Initialize();
-		break;
-#endif
-
-#if SHARPGUI_INCLUDE_OVERLAY
-	case Backends::BackendType::Overlay:
-		Backends::Overlay::Initialize();
-		break;
-#endif
+		CHECK_TYPE(Backends::BackendType::BackendType_DX9, Backends::DX9Backend)
+		CHECK_TYPE(Backends::BackendType::BackendType_DX11, Backends::DX11Backend)
+		CHECK_TYPE(Backends::BackendType::BackendType_OpenGL, Backends::OpenGLBackend)
+		CHECK_TYPE(Backends::BackendType::BackendType_Overlay, Backends::OverlayBackend)
 
 	default:
-		return false;
+		break;
 	}
 
-	currentBackend = backendType;
+	return backendInstance;
+}
+
+bool SharpGUI::Initialize(Backends::BackendType backendType)
+{
+	// Check if current backend is initialized
+	if (Backends::currentBackend != nullptr && Backends::currentBackend->IsInitialized())
+		return false;
+
+	Backends::currentBackend = GetBackend(backendType);
+
+	// Check if backend is found
+	if (Backends::currentBackend == nullptr)
+		return false;
+
+	Backends::currentBackend->Initialize();
 
 	return true;
 }
@@ -94,37 +101,26 @@ bool SharpGUI::Initialize()
 
 bool SharpGUI::Shutdown()
 {
-	Backends::BackendType::Enum backendType = GetBackendType();
-
-	switch (backendType)
-	{
-#if SHARPGUI_INCLUDE_DX9
-	case Backends::BackendType::DX9:
-		Backends::DX9::Shutdown();
-#endif
-
-#if SHARPGUI_INCLUDE_DX11
-	case Backends::BackendType::DX11:
-		Backends::DX11::Shutdown();
-		break;
-#endif
-
-#if SHARPGUI_INCLUDE_OPENGL
-	case Backends::BackendType::OpenGL:
-		Backends::OpenGL::Shutdown();
-		break;
-#endif
-
-#if SHARPGUI_INCLUDE_OVERLAY
-	case Backends::BackendType::Overlay:
-		Backends::Overlay::Shutdown();
-		break;
-#endif
-
-	default:
+	if (Backends::currentBackend != nullptr && !Backends::currentBackend->IsInitialized())
 		return false;
-	}
+
+	Backends::currentBackend->Shutdown();
 
 	return true;
 }
 
+void SharpGUI::SetHandleInput(bool handleInput)
+{
+	if (Backends::currentBackend != nullptr && !Backends::currentBackend->IsInitialized())
+		return;
+
+	Backends::currentBackend->SetHandleInput(handleInput);
+}
+
+bool SharpGUI::GetHandleInput()
+{
+	if (Backends::currentBackend != nullptr && !Backends::currentBackend->IsInitialized())
+		return false;
+
+	return Backends::currentBackend->GetHandleInput();
+}

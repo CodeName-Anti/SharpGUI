@@ -1,11 +1,11 @@
 #pragma once
 
-namespace CSharpInterop
+namespace Interop
 {
-	typedef void (*CSharpCallback)();
+	typedef void (*SharpGUICallback)();
 
-	extern CSharpCallback initImGuiCallback;
-	extern CSharpCallback renderCallback;
+	extern SharpGUICallback initImGuiCallback;
+	extern SharpGUICallback renderCallback;
 }
 
 extern "C"
@@ -14,8 +14,8 @@ extern "C"
 	__declspec(dllexport) bool __stdcall InitializeSharpGUIBackend(int backendType);
 	__declspec(dllexport) bool __stdcall ShutdownSharpGUI();
 
-	__declspec(dllexport) void __stdcall SetInitImGuiCallback(CSharpInterop::CSharpCallback initImGuiCallback);
-	__declspec(dllexport) void __stdcall SetRenderCallback(CSharpInterop::CSharpCallback renderCallback);
+	__declspec(dllexport) void __stdcall SetInitImGuiCallback(Interop::SharpGUICallback initImGuiCallback);
+	__declspec(dllexport) void __stdcall SetRenderCallback(Interop::SharpGUICallback renderCallback);
 
 	__declspec(dllexport) void __stdcall SetHandleInput(bool handleInput);
 }

@@ -1,10 +1,10 @@
 #include "exports.hpp"
 #include "sharpgui.hpp"
 
-namespace CSharpInterop
+namespace Interop
 {
-	CSharpCallback initImGuiCallback;
-	CSharpCallback renderCallback;
+	SharpGUICallback initImGuiCallback;
+	SharpGUICallback renderCallback;
 }
 
 bool __stdcall InitializeSharpGUI()
@@ -14,7 +14,7 @@ bool __stdcall InitializeSharpGUI()
 
 bool __stdcall InitializeSharpGUIBackend(int backendType)
 {
-	return SharpGUI::Initialize((Backends::BackendType::Enum)backendType);
+	return SharpGUI::Initialize((Backends::BackendType)backendType);
 }
 
 bool __stdcall ShutdownSharpGUI()
@@ -22,17 +22,17 @@ bool __stdcall ShutdownSharpGUI()
 	return SharpGUI::Shutdown();
 }
 
-void __stdcall SetInitImGuiCallback(CSharpInterop::CSharpCallback initImGuiCallback)
+void __stdcall SetInitImGuiCallback(Interop::SharpGUICallback initImGuiCallback)
 {
-	CSharpInterop::initImGuiCallback = initImGuiCallback;
+	Interop::initImGuiCallback = initImGuiCallback;
 }
 
-void __stdcall SetRenderCallback(CSharpInterop::CSharpCallback renderCallback)
+void __stdcall SetRenderCallback(Interop::SharpGUICallback renderCallback)
 {
-	CSharpInterop::renderCallback = renderCallback;
+	Interop::renderCallback = renderCallback;
 }
 
 void __stdcall SetHandleInput(bool handleInput)
 {
-	Backends::SetHandleInput(handleInput);
+	SharpGUI::SetHandleInput(handleInput);
 }

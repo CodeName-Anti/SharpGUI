@@ -1,32 +1,40 @@
 #pragma once
 
-#include "dx9_backend.hpp"
-#include "dx11_backend.hpp"
-#include "win32_backend.hpp"
-#include "opengl_backend.hpp"
-
-#include "overlay_backend.hpp"
-
 namespace Backends
 {
-	extern bool handleInput;
+	enum BackendType
+	{
+		BackendType_None,
+		BackendType_DX9,
+		BackendType_DX11,
+		BackendType_OpenGL,
+		BackendType_Overlay
+	};
+
+	class Backend
+	{
+	public:
+		virtual BackendType GetType();
+
+		void Initialize();
+		bool IsInitialized();
+
+		void Shutdown();
+
+		virtual void SetHandleInput(bool handleInput) {}
+		virtual bool GetHandleInput();
+	protected:
+		virtual void InitializeBackend() {}
+		virtual void ShutdownBackend() {}
+
+		bool initialized;
+		bool handleInput;
+	};
+
+	extern Backend* currentBackend;
 
 	void InitImGui();
 	void ShutdownImGui();
 
-	void SetHandleInput(bool handleInput);
-
 	void RenderGUI();
-
-	struct BackendType
-	{
-		enum Enum
-		{
-			None,
-			DX9,
-			DX11,
-			OpenGL,
-			Overlay
-		};
-	};
 }

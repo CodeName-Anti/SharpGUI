@@ -4,12 +4,19 @@
 
 #if SHARPGUI_INCLUDE_DX11
 
-namespace Backends::DX11
-{
-	extern bool initialized;
+#include "win32_backend.hpp"
 
-	void Initialize();
-	void Shutdown();
+namespace Backends
+{
+	class DX11Backend : Win32Backend
+	{
+	public:
+		Backends::BackendType GetType() override;
+
+	protected:
+		void InitializeBackend() override;
+		void ShutdownBackend() override;
+	};
 }
 
 #endif

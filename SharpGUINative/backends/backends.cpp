@@ -11,7 +11,42 @@
 
 namespace Backends
 {
-	bool handleInput = false;
+	Backend* currentBackend;
+}
+
+Backends::BackendType Backends::Backend::GetType()
+{
+	return BackendType::BackendType_None;
+}
+
+void Backends::Backend::Initialize()
+{
+	if (this->initialized)
+		return;
+
+	this->InitializeBackend();
+
+	initialized = true;
+}
+
+bool Backends::Backend::IsInitialized()
+{
+	return this->initialized;
+}
+
+void Backends::Backend::Shutdown()
+{
+	if (!this->initialized)
+		return;
+
+	this->ShutdownBackend();
+
+	initialized = false;
+}
+
+bool Backends::Backend::GetHandleInput()
+{
+	return this->handleInput;
 }
 
 void Backends::InitImGui()
@@ -21,8 +56,8 @@ void Backends::InitImGui()
 	io->ConfigFlags = ImGuiConfigFlags_NavEnableKeyboard;
 	io->IniFilename = nullptr;
 
-	if (CSharpInterop::initImGuiCallback != nullptr)
-		CSharpInterop::initImGuiCallback();
+	if (Interop::initImGuiCallback != nullptr)
+		Interop::initImGuiCallback();
 }
 
 void Backends::ShutdownImGui()
@@ -32,8 +67,8 @@ void Backends::ShutdownImGui()
 
 void Backends::RenderGUI()
 {
-	if (CSharpInterop::renderCallback != nullptr)
-		CSharpInterop::renderCallback();
+	if (Interop::renderCallback != nullptr)
+		Interop::renderCallback();
 
 #if _DEBUG
 	static bool showGui = true;

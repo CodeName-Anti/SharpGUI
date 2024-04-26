@@ -1,3 +1,4 @@
+#include "win32_backend.hpp"
 #include "backends.hpp"
 
 #define CIMGUI_USE_WIN32
@@ -24,6 +25,7 @@ GetClipCursorDef oGetClipCursor;
 namespace Backends::Win32
 {
 	bool initialized = false;
+	bool handleInput = false;
 	HWND window = NULL;
 
 	WNDPROC oWndProc = nullptr;
@@ -59,7 +61,7 @@ int ShowMouseCursor()
 
 bool WINAPI hkGetCursorPos(LPPOINT lpPoint)
 {
-	if (Backends::handleInput)
+	if (Backends::Win32::handleInput)
 	{
 		if (lpPoint != nullptr)
 		{
@@ -74,7 +76,7 @@ bool WINAPI hkGetCursorPos(LPPOINT lpPoint)
 
 bool WINAPI hkSetCursorPos(int X, int Y)
 {
-	if (Backends::handleInput)
+	if (Backends::Win32::handleInput)
 	{
 		Backends::Win32::cursorPos.x = X;
 		Backends::Win32::cursorPos.y = Y;
@@ -89,7 +91,7 @@ int WINAPI hkShowCursor(bool bShow)
 {
 	Backends::Win32::cursorVisible = bShow;
 
-	if (Backends::handleInput)
+	if (Backends::Win32::handleInput)
 	{
 		return ShowMouseCursor();
 	}
@@ -109,7 +111,7 @@ BOOL WINAPI hkClipCursor(const RECT* lpRect)
 		Backends::Win32::cursorClip.bottom = lpRect->bottom;
 	}
 
-	if (Backends::handleInput)
+	if (Backends::Win32::handleInput)
 	{
 		return true;
 	}
@@ -119,7 +121,7 @@ BOOL WINAPI hkClipCursor(const RECT* lpRect)
 
 BOOL WINAPI hkGetClipCursor(LPRECT lpRect)
 {
-	if (Backends::handleInput)
+	if (Backends::Win32::handleInput)
 	{
 		*lpRect = Backends::Win32::cursorClip;
 		return true;
@@ -130,7 +132,7 @@ BOOL WINAPI hkGetClipCursor(LPRECT lpRect)
 
 LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if (Backends::handleInput)
+	if (Backends::Win32::handleInput)
 	{
 		if (!IsCursorVisible())
 		{
@@ -224,12 +226,13 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	return CallWindowProc(Backends::Win32::oWndProc, hWnd, uMsg, wParam, lParam);
 }
 
-void Backends::SetHandleInput(bool handleInput)
+void Backends::Win32Backend::SetHandleInput(bool handleInput)
 {
-	if (Backends::handleInput == handleInput)
+	if (Backends::Win32::handleInput == handleInput)
 		return;
 
-	Backends::handleInput = handleInput;
+	this->handleInput = handleInput;
+	Backends::Win32::handleInput = handleInput;
 
 	if (handleInput)
 	{
@@ -257,6 +260,9 @@ void DisableAndRemoveHook(LPVOID pTarget)
 
 void Backends::Win32::Initialize(HWND window)
 {
+	if (initialized)
+		return;
+
 	Backends::Win32::window = window;
 	oWndProc = (WNDPROC)SetWindowLongPtr(Backends::Win32::window, GWLP_WNDPROC, (LONG_PTR)WndProc);
 
@@ -278,11 +284,17 @@ void Backends::Win32::Initialize(HWND window)
 
 void Backends::Win32::NewFrame()
 {
+	if (!initialized)
+		return;
+
 	ImGui_ImplWin32_NewFrame();
 }
 
 void Backends::Win32::Shutdown()
 {
+	if (!initialized)
+		return;
+
 	(WNDPROC)SetWindowLongPtr(Backends::Win32::window, GWLP_WNDPROC, (LONG_PTR)oWndProc);
 
 	ImGui_ImplWin32_Shutdown();

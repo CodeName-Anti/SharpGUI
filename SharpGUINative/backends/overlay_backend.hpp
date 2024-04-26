@@ -4,13 +4,20 @@
 
 #if SHARPGUI_INCLUDE_OVERLAY
 
-namespace Backends::Overlay
-{
-	extern bool initialized;
+#include "backends.hpp"
+#include "win32_backend.hpp"
 
-	void Initialize(HWND targetWindow);
-	void Initialize();
-	void Shutdown();
+namespace Backends
+{
+	class OverlayBackend : public Backends::Win32Backend
+	{
+	public:
+		Backends::BackendType GetType() override;
+
+	protected:
+		void InitializeBackend() override;
+		void ShutdownBackend() override;
+	};
 }
 
 #endif

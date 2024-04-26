@@ -3,6 +3,8 @@
 #if SHARPGUI_INCLUDE_OVERLAY
 
 #include "backends.hpp"
+#include "overlay_backend.hpp"
+#include "win32_backend.hpp"
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -380,7 +382,8 @@ void RenderThread()
 	Backends::Overlay::outputWindow = NULL;
 }
 
-struct handle_data {
+struct handle_data
+{
 	unsigned long process_id;
 	HWND window_handle;
 };
@@ -393,10 +396,13 @@ BOOL IsMainWindow(HWND handle)
 BOOL CALLBACK EnumWindowsCallback(HWND handle, LPARAM lParam)
 {
 	handle_data& data = *(handle_data*)lParam;
+
 	unsigned long process_id = 0;
 	GetWindowThreadProcessId(handle, &process_id);
+
 	if (data.process_id != process_id || !IsMainWindow(handle))
 		return TRUE;
+
 	data.window_handle = handle;
 	return FALSE;
 }
@@ -410,38 +416,28 @@ HWND FindMainWindow(unsigned long process_id)
 	return data.window_handle;
 }
 
-void Backends::Overlay::Initialize()
+Backends::BackendType Backends::OverlayBackend::GetType()
 {
-	Initialize(FindMainWindow(GetCurrentProcessId()));
+	return Backends::BackendType_Overlay;
 }
 
-void Backends::Overlay::Initialize(HWND targetWindow)
+void Backends::OverlayBackend::InitializeBackend()
 {
-	if (initialized)
-		return;
+	Backends::Overlay::targetWindow = FindMainWindow(GetCurrentProcessId());
 
-	Backends::Overlay::targetWindow = targetWindow;
+	Backends::Overlay::runThread = true;
 
-	runThread = true;
-
-	thread = CreateThread(nullptr, NULL, (LPTHREAD_START_ROUTINE)RenderThread, nullptr, NULL, nullptr);
-
-	initialized = true;
+	Backends::Overlay::thread = CreateThread(nullptr, NULL, (LPTHREAD_START_ROUTINE)RenderThread, nullptr, NULL, nullptr);
 }
 
-void Backends::Overlay::Shutdown()
+void Backends::OverlayBackend::ShutdownBackend()
 {
-	if (!initialized)
-		return;
-
-	runThread = false;
+	Backends::Overlay::runThread = false;
 
 	// Wait until thread is finished
-	WaitForSingleObject(thread, INFINITE);
+	WaitForSingleObject(Backends::Overlay::thread, INFINITE);
 
-	targetWindow = NULL;
-	outputWindow = NULL;
-
-	initialized = false;
+	Backends::Overlay::targetWindow = NULL;
+	Backends::Overlay::outputWindow = NULL;
 }
 #endif

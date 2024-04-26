@@ -3,6 +3,9 @@
 #if SHARPGUI_INCLUDE_DX11
 
 #include "backends.hpp"
+#include "dx11_backend.hpp"
+#include "win32_backend.hpp"
+
 #include "d3d11.h"
 #include "kiero.h"
 
@@ -14,7 +17,6 @@ typedef HRESULT(__stdcall *ResizeBuffersFunc) (IDXGISwapChain* pSwapChain, UINT 
 
 namespace Backends::DX11
 {
-	bool initialized = false;
 	bool hookInit = false;
 
 	PresentFunc oPresent;
@@ -104,37 +106,33 @@ HRESULT __stdcall hkResizeBuffers(IDXGISwapChain* pSwapChain, UINT BufferCount, 
 	return hr;
 }
 
-void Backends::DX11::Initialize()
+Backends::BackendType Backends::DX11Backend::GetType()
 {
-	if (initialized)
-		return;
-	
-	kiero::init(kiero::RenderType::D3D11);
-
-	kiero::bind(8, (void**)&oPresent, hkPresent);
-	kiero::bind(13, (void**)&oResizeBuffers, hkResizeBuffers);
-
-	initialized = true;
+	return Backends::BackendType_DX11;
 }
 
-void Backends::DX11::Shutdown()
+void Backends::DX11Backend::InitializeBackend()
 {
-	if (!initialized)
-		return;
+	kiero::init(kiero::RenderType::D3D11);
 
+	kiero::bind(8, (void**)&Backends::DX11::oPresent, hkPresent);
+	kiero::bind(13, (void**)&Backends::DX11::oResizeBuffers, hkResizeBuffers);
+}
+
+void Backends::DX11Backend::ShutdownBackend()
+{
 	kiero::shutdown();
 	
 	ImGui_ImplDX11_Shutdown();
 	Backends::Win32::Shutdown();
 
-	pDevice->Release();
-	pContext->Release();
-	pMainRenderTargetView->Release();
+	Backends::DX11::pDevice->Release();
+	Backends::DX11::pContext->Release();
+	Backends::DX11::pMainRenderTargetView->Release();
 
 	Backends::ShutdownImGui();
 
 
-	hookInit = false;
-	initialized = false;
+	Backends::DX11::hookInit = false;
 }
 #endif

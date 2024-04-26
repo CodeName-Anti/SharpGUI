@@ -3,6 +3,9 @@
 #if SHARPGUI_INCLUDE_DX9
 
 #include "backends.hpp"
+#include "dx9_backend.hpp"
+#include "win32_backend.hpp"
+
 #include "d3d9.h"
 #include "kiero.h"
 
@@ -14,7 +17,6 @@ typedef HRESULT(__stdcall* ResetFunc)(IDirect3DDevice9* pDevice, D3DPRESENT_PARA
 
 namespace Backends::DX9
 {
-	bool initialized = false;
 	bool hookInit = false;
 
 	EndSceneFunc oEndScene;
@@ -60,22 +62,20 @@ HRESULT __stdcall hkReset(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPre
 	return hr;
 }
 
-void Backends::DX9::Initialize()
+Backends::BackendType Backends::DX9Backend::GetType()
 {
-	if (initialized)
-		return;
-
-	kiero::init(kiero::RenderType::D3D9);
-	kiero::bind(42, (void**)&oEndScene, hkEndScene);
-	kiero::bind(16, (void**)&oReset, hkReset);
-	initialized = true;
+	return Backends::BackendType_DX9;
 }
 
-void Backends::DX9::Shutdown()
+void Backends::DX9Backend::InitializeBackend()
 {
-	if (!initialized)
-		return;
+	kiero::init(kiero::RenderType::D3D9);
+	kiero::bind(42, (void**)&Backends::DX9::oEndScene, hkEndScene);
+	kiero::bind(16, (void**)&Backends::DX9::oReset, hkReset);
+}
 
+void Backends::DX9Backend::ShutdownBackend()
+{
 	kiero::shutdown();
 
 	ImGui_ImplDX9_Shutdown();
@@ -83,8 +83,5 @@ void Backends::DX9::Shutdown()
 
 	Backends::Win32::Shutdown();
 	Backends::ShutdownImGui();
-
-	hookInit = false;
-	initialized = false;
 }
 #endif

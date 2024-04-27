@@ -27,9 +27,14 @@ namespace Backends::DX11
 	ID3D11RenderTargetView* pMainRenderTargetView;
 
 	HWND outputWindow;
+
+	void CreateMainRenderTargetView(IDXGISwapChain* pSwapChain);
+
+	HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags);
+	HRESULT __stdcall hkResizeBuffers(IDXGISwapChain* pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags);
 }
 
-void CreateMainRenderTargetView(IDXGISwapChain* pSwapChain)
+void Backends::DX11::CreateMainRenderTargetView(IDXGISwapChain* pSwapChain)
 {
 	ID3D11Texture2D* pBackBuffer;
 	pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&pBackBuffer);
@@ -45,7 +50,7 @@ void CreateMainRenderTargetView(IDXGISwapChain* pSwapChain)
 	pBackBuffer->Release();
 }
 
-static HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
+HRESULT __stdcall Backends::DX11::hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags)
 {
 	if (!Backends::DX11::hookInit)
 	{
@@ -89,7 +94,7 @@ static HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval
 	return Backends::DX11::oPresent(pSwapChain, SyncInterval, Flags);
 }
 
-HRESULT __stdcall hkResizeBuffers(IDXGISwapChain* pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags)
+HRESULT __stdcall Backends::DX11::hkResizeBuffers(IDXGISwapChain* pSwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags)
 {
 	if (Backends::DX11::pMainRenderTargetView)
 	{
@@ -115,8 +120,8 @@ void Backends::DX11Backend::InitializeBackend()
 {
 	kiero::init(kiero::RenderType::D3D11);
 
-	kiero::bind(8, (void**)&Backends::DX11::oPresent, hkPresent);
-	kiero::bind(13, (void**)&Backends::DX11::oResizeBuffers, hkResizeBuffers);
+	kiero::bind(8, (void**)&Backends::DX11::oPresent, Backends::DX11::hkPresent);
+	kiero::bind(13, (void**)&Backends::DX11::oResizeBuffers, Backends::DX11::hkResizeBuffers);
 }
 
 void Backends::DX11Backend::ShutdownBackend()

@@ -83,6 +83,9 @@
     <ClCompile Include="backends\overlay_backend.cpp">
       <Filter>Source Files\backends</Filter>
     </ClCompile>
+    <ClCompile Include="backends\dx10_backend.cpp">
+      <Filter>Source Files\backends</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kiero\kiero.h">
@@ -149,6 +152,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="backends\overlay_backend.hpp">
+      <Filter>Header Files\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="backends\dx10_backend.hpp">
       <Filter>Header Files\backends</Filter>
     </ClInclude>
   </ItemGroup>

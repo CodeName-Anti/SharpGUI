@@ -156,6 +156,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="backends\backends.cpp" />
+    <ClCompile Include="backends\dx10_backend.cpp" />
     <ClCompile Include="backends\dx11_backend.cpp" />
     <ClCompile Include="backends\dx9_backend.cpp" />
     <ClCompile Include="exports.cpp" />
@@ -174,6 +175,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="backends\backends.hpp" />
+    <ClInclude Include="backends\dx10_backend.hpp" />
     <ClInclude Include="backends\dx9_backend.hpp" />
     <ClInclude Include="cimgui\cimgui.h" />
     <ClInclude Include="cimgui\cimgui_impl.h" />

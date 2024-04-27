@@ -6,6 +6,7 @@
 #include "backends/backends.hpp"
 
 #include "backends/dx9_backend.hpp"
+#include "backends/dx10_backend.hpp"
 #include "backends/dx11_backend.hpp"
 #include "backends/win32_backend.hpp"
 #include "backends/opengl_backend.hpp"
@@ -28,6 +29,10 @@ Backends::BackendType SharpGUI::GetBackendType()
 
 #if SHARPGUI_INCLUDE_DX9
 	CHECK_FOR_DLL("d3d9.dll", Backends::BackendType::BackendType_DX9);
+#endif
+
+#if SHARPGUI_INCLUDE_DX10
+	CHECK_FOR_DLL("d3d10.dll", Backends::BackendType::BackendType_DX10);
 #endif
 
 #if SHARPGUI_INCLUDE_DX11
@@ -66,6 +71,7 @@ case enumName:															\
 	switch (type)
 	{
 		CHECK_TYPE(Backends::BackendType::BackendType_DX9, Backends::DX9Backend)
+		CHECK_TYPE(Backends::BackendType::BackendType_DX10, Backends::DX10Backend)
 		CHECK_TYPE(Backends::BackendType::BackendType_DX11, Backends::DX11Backend)
 		CHECK_TYPE(Backends::BackendType::BackendType_OpenGL, Backends::OpenGLBackend)
 		CHECK_TYPE(Backends::BackendType::BackendType_Overlay, Backends::OverlayBackend)

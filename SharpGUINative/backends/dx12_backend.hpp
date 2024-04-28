@@ -2,13 +2,13 @@
 
 #include "sharpconfig.hpp"
 
-#if SHARPGUI_INCLUDE_DX11
+#if SHARPGUI_INCLUDE_DX12
 
 #include "win32_backend.hpp"
 
 namespace Backends
 {
-	class DX11Backend : public Win32Backend
+	class DX12Backend : public Win32Backend
 	{
 	public:
 		Backends::BackendType GetType() override;

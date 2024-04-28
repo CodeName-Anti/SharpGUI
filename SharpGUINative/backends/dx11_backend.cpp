@@ -86,7 +86,6 @@ HRESULT __stdcall Backends::DX11::hkPresent(IDXGISwapChain* pSwapChain, UINT Syn
 
 	Backends::RenderGUI();
 
-	igEndFrame();
 	igRender();
 
 	Backends::DX11::pContext->OMSetRenderTargets(1, &Backends::DX11::pMainRenderTargetView, NULL);

@@ -86,6 +86,9 @@
     <ClCompile Include="backends\dx10_backend.cpp">
       <Filter>Source Files\backends</Filter>
     </ClCompile>
+    <ClCompile Include="backends\dx12_backend.cpp">
+      <Filter>Source Files\backends</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kiero\kiero.h">
@@ -155,6 +158,9 @@
       <Filter>Header Files\backends</Filter>
     </ClInclude>
     <ClInclude Include="backends\dx10_backend.hpp">
+      <Filter>Header Files\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="backends\dx12_backend.hpp">
       <Filter>Header Files\backends</Filter>
     </ClInclude>
   </ItemGroup>

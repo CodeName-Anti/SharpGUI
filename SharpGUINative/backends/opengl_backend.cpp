@@ -95,7 +95,6 @@ bool __stdcall hkWglSwapBuffers(HDC hDc)
 
 	Backends::RenderGUI();
 
-	igEndFrame();
 	igRender();
 	
 	if (Backends::OpenGL::newOpenGL)

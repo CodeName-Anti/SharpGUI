@@ -9,7 +9,7 @@
 
 namespace Backends
 {
-	class OverlayBackend : public Backends::Win32Backend
+	class OverlayBackend : public Win32Backend
 	{
 	public:
 		Backends::BackendType GetType() override;

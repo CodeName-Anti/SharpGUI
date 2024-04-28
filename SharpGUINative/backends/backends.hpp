@@ -8,6 +8,7 @@ namespace Backends
 		BackendType_DX9,
 		BackendType_DX10,
 		BackendType_DX11,
+		BackendType_DX12,
 		BackendType_OpenGL,
 		BackendType_Overlay
 	};

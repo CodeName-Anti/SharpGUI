@@ -356,7 +356,6 @@ void RenderThread()
 
 		SetWindowLongW(outputWindow, GWL_EXSTYLE, WS_EX_TOPMOST | WS_EX_LAYERED | WS_EX_TOOLWINDOW | WS_EX_TRANSPARENT);
 
-		igEndFrame();
 		igRender();
 
 		Backends::Overlay::pContext->OMSetRenderTargets(1, &Backends::Overlay::pMainRenderTargetView, nullptr);

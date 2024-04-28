@@ -43,7 +43,6 @@ HRESULT __stdcall hkEndScene(IDirect3DDevice9* pDevice)
 
 	Backends::RenderGUI();
 
-	igEndFrame();
 	igRender();
 
 	ImGui_ImplDX9_RenderDrawData(igGetDrawData());

@@ -36,16 +36,19 @@ namespace Backends::OpenGL
 	WglSwapBuffersFunc oWglSwapBuffers;
 
 	HGLRC wglContext;
+
+	bool __stdcall hkWglSwapBuffers(HDC hDc);
+	WglSwapBuffersFunc* GetWglSwapBuffers();
 }
 
-bool __stdcall hkWglSwapBuffers(HDC hDc)
+bool __stdcall Backends::OpenGL::hkWglSwapBuffers(HDC hDc)
 {
-	if (!Backends::OpenGL::initHook)
+	if (!initHook)
 	{
-		if (WindowFromDC(hDc) == Backends::OpenGL::window)
-			return Backends::OpenGL::oWglSwapBuffers(hDc);
+		if (WindowFromDC(hDc) == window)
+			return oWglSwapBuffers(hDc);
 
-		Backends::OpenGL::window = WindowFromDC(hDc);
+		window = WindowFromDC(hDc);
 
 		Backends::InitImGui();
 		Backends::Win32::Initialize(Backends::OpenGL::window);
@@ -65,9 +68,9 @@ bool __stdcall hkWglSwapBuffers(HDC hDc)
 
 		// Check if OpenGL version is above 3.0
 		if ((iMajor * 10 + iMinor) >= 30)
-			Backends::OpenGL::newOpenGL = true;
+			newOpenGL = true;
 
-		if (Backends::OpenGL::newOpenGL)
+		if (newOpenGL)
 		{
 			ImGui_ImplOpenGL3_Init(nullptr);
 		}
@@ -76,16 +79,16 @@ bool __stdcall hkWglSwapBuffers(HDC hDc)
 			ImGui_ImplOpenGL2_Init();
 		}
 
-		Backends::OpenGL::wglContext = wglCreateContext(hDc);
+		wglContext = wglCreateContext(hDc);
 
-		Backends::OpenGL::initHook = true;
+		initHook = true;
 	}
 
 	HGLRC originalWglContext = wglGetCurrentContext();
 
-	wglMakeCurrent(hDc, Backends::OpenGL::wglContext);
+	wglMakeCurrent(hDc, wglContext);
 
-	if (Backends::OpenGL::newOpenGL)
+	if (newOpenGL)
 		ImGui_ImplOpenGL3_NewFrame();
 	else
 		ImGui_ImplOpenGL2_NewFrame();
@@ -97,17 +100,17 @@ bool __stdcall hkWglSwapBuffers(HDC hDc)
 
 	igRender();
 	
-	if (Backends::OpenGL::newOpenGL)
+	if (newOpenGL)
 		ImGui_ImplOpenGL3_RenderDrawData(igGetDrawData());
 	else
 		ImGui_ImplOpenGL2_RenderDrawData(igGetDrawData());
 
 	wglMakeCurrent(hDc, originalWglContext);
 
-	return Backends::OpenGL::oWglSwapBuffers(hDc);
+	return oWglSwapBuffers(hDc);
 }
 
-WglSwapBuffersFunc* GetWglSwapBuffers()
+WglSwapBuffersFunc* Backends::OpenGL::GetWglSwapBuffers()
 {
 	auto hMod = GetModuleHandleA("OPENGL32.dll");
 	if (!hMod) return nullptr;
@@ -122,11 +125,11 @@ Backends::BackendType Backends::OpenGLBackend::GetType()
 
 void Backends::OpenGLBackend::InitializeBackend()
 {
-	Backends::OpenGL::swapBuffersAddress = GetWglSwapBuffers();
+	Backends::OpenGL::swapBuffersAddress = Backends::OpenGL::GetWglSwapBuffers();
 
 	MH_Initialize();
 
-	MH_CreateHook(Backends::OpenGL::swapBuffersAddress, hkWglSwapBuffers, (void**)&Backends::OpenGL::oWglSwapBuffers);
+	MH_CreateHook(Backends::OpenGL::swapBuffersAddress, Backends::OpenGL::hkWglSwapBuffers, (void**)&Backends::OpenGL::oWglSwapBuffers);
 	MH_EnableHook(Backends::OpenGL::swapBuffersAddress);
 
 }

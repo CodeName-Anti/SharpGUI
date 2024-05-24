@@ -40,9 +40,39 @@ namespace Backends::Overlay
 	ID3D11DeviceContext* pContext = nullptr;
 	IDXGISwapChain* pSwapChain = nullptr;
 	ID3D11RenderTargetView* pMainRenderTargetView = nullptr;
+
+	LRESULT WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+
+	// Render Target
+	void CreateRenderTarget();
+	void CleanupRenderTarget();
+
+	// Device
+	bool CreateDevice(HWND outputWindow);
+	void CleanupDevice();
+
+	// Window stuff
+	bool IsWindowAlive();
+	bool UnadjustWindowRectEx(RECT* prc, LONG dwStyle, bool fMenu, LONG dwExStyle);
+	void MoveOutputWindow();
+	bool IsWindowFocus();
+
+	// Renders DX11
+	void RenderThread();
+
+	// Window utilities
+	struct handle_data
+	{
+		unsigned long process_id;
+		HWND window_handle;
+	};
+
+	BOOL IsMainWindow(HWND handle);
+	BOOL CALLBACK EnumWindowsCallback(HWND handle, LPARAM lParam);
+	HWND FindMainWindow(unsigned long process_id);
 }
 
-LRESULT WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+LRESULT Backends::Overlay::WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (Msg)
 	{
@@ -70,7 +100,7 @@ LRESULT WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(hWnd, Msg, wParam, lParam);
 }
 
-void CreateRenderTarget()
+void Backends::Overlay::CreateRenderTarget()
 {
 	ID3D11Texture2D* pBackBuffer;
 	Backends::Overlay::pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
@@ -82,7 +112,7 @@ void CreateRenderTarget()
 	}
 }
 
-void CleanupRenderTarget()
+void Backends::Overlay::CleanupRenderTarget()
 {
 	if (Backends::Overlay::pMainRenderTargetView)
 	{
@@ -91,7 +121,7 @@ void CleanupRenderTarget()
 	}
 }
 
-bool CreateDevice(HWND outputWindow)
+bool Backends::Overlay::CreateDevice(HWND outputWindow)
 {
 	DXGI_SWAP_CHAIN_DESC sd;
 
@@ -145,7 +175,7 @@ bool CreateDevice(HWND outputWindow)
 	return true;
 }
 
-void CleanupDevice()
+void Backends::Overlay::CleanupDevice()
 {
 	CleanupRenderTarget();
 
@@ -165,7 +195,7 @@ void CleanupDevice()
 }
 
 
-bool IsWindowAlive()
+bool Backends::Overlay::IsWindowAlive()
 {
 	if (Backends::Overlay::targetWindow == NULL)
 		return false;
@@ -176,7 +206,7 @@ bool IsWindowAlive()
 	return true;
 }
 
-bool UnadjustWindowRectEx(RECT* prc, LONG dwStyle, bool fMenu, LONG dwExStyle)
+bool Backends::Overlay::UnadjustWindowRectEx(RECT* prc, LONG dwStyle, bool fMenu, LONG dwExStyle)
 {
 	RECT rc = {};
 
@@ -193,7 +223,7 @@ bool UnadjustWindowRectEx(RECT* prc, LONG dwStyle, bool fMenu, LONG dwExStyle)
 	return fRc;
 }
 
-void MoveOutputWindow()
+void Backends::Overlay::MoveOutputWindow()
 {
 	if (Backends::Overlay::targetWindow == NULL)
 		return;
@@ -213,7 +243,7 @@ void MoveOutputWindow()
 	SetWindowPos(Backends::Overlay::outputWindow, NULL, clientRect.left, clientRect.top, rectWidth, rectHeight, SWP_SHOWWINDOW);
 }
 
-bool IsWindowFocus()
+bool Backends::Overlay::IsWindowFocus()
 {
 	HWND outputWindow = Backends::Overlay::outputWindow;
 	HWND targetWindow = Backends::Overlay::targetWindow;
@@ -241,7 +271,7 @@ bool IsWindowFocus()
 	return true;
 }
 
-void RenderThread()
+void Backends::Overlay::RenderThread()
 {
 	WNDCLASSEX windowClass;
 
@@ -381,18 +411,12 @@ void RenderThread()
 	Backends::Overlay::outputWindow = NULL;
 }
 
-struct handle_data
-{
-	unsigned long process_id;
-	HWND window_handle;
-};
-
-BOOL IsMainWindow(HWND handle)
+BOOL Backends::Overlay::IsMainWindow(HWND handle)
 {
 	return GetWindow(handle, GW_OWNER) == (HWND)0 && IsWindowVisible(handle);
 }
 
-BOOL CALLBACK EnumWindowsCallback(HWND handle, LPARAM lParam)
+BOOL CALLBACK Backends::Overlay::EnumWindowsCallback(HWND handle, LPARAM lParam)
 {
 	handle_data& data = *(handle_data*)lParam;
 
@@ -406,7 +430,7 @@ BOOL CALLBACK EnumWindowsCallback(HWND handle, LPARAM lParam)
 	return FALSE;
 }
 
-HWND FindMainWindow(unsigned long process_id)
+HWND Backends::Overlay::FindMainWindow(unsigned long process_id)
 {
 	handle_data data;
 	data.process_id = process_id;
@@ -422,11 +446,11 @@ Backends::BackendType Backends::OverlayBackend::GetType()
 
 void Backends::OverlayBackend::InitializeBackend()
 {
-	Backends::Overlay::targetWindow = FindMainWindow(GetCurrentProcessId());
+	Backends::Overlay::targetWindow = Backends::Overlay::FindMainWindow(GetCurrentProcessId());
 
 	Backends::Overlay::runThread = true;
 
-	Backends::Overlay::thread = CreateThread(nullptr, NULL, (LPTHREAD_START_ROUTINE)RenderThread, nullptr, NULL, nullptr);
+	Backends::Overlay::thread = CreateThread(nullptr, NULL, (LPTHREAD_START_ROUTINE)Backends::Overlay::RenderThread, nullptr, NULL, nullptr);
 }
 
 void Backends::OverlayBackend::ShutdownBackend()

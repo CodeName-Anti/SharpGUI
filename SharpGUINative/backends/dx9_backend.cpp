@@ -21,11 +21,14 @@ namespace Backends::DX9
 
 	EndSceneFunc oEndScene;
 	ResetFunc oReset;
+
+	HRESULT __stdcall hkEndScene(IDirect3DDevice9* pDevice);
+	HRESULT __stdcall hkReset(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters);
 }
 
-HRESULT __stdcall hkEndScene(IDirect3DDevice9* pDevice)
+HRESULT __stdcall Backends::DX9::hkEndScene(IDirect3DDevice9* pDevice)
 {
-	if (!Backends::DX9::hookInit)
+	if (!hookInit)
 	{
 		D3DDEVICE_CREATION_PARAMETERS creationParameters;
 		pDevice->GetCreationParameters(&creationParameters);
@@ -34,7 +37,7 @@ HRESULT __stdcall hkEndScene(IDirect3DDevice9* pDevice)
 		Backends::Win32::Initialize(creationParameters.hFocusWindow);
 		ImGui_ImplDX9_Init(pDevice);
 
-		Backends::DX9::hookInit = true;
+		hookInit = true;
 	}
 
 	Backends::Win32::NewFrame();
@@ -47,14 +50,14 @@ HRESULT __stdcall hkEndScene(IDirect3DDevice9* pDevice)
 
 	ImGui_ImplDX9_RenderDrawData(igGetDrawData());
 
-	return Backends::DX9::oEndScene(pDevice);
+	return oEndScene(pDevice);
 }
 
-HRESULT __stdcall hkReset(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters)
+HRESULT __stdcall Backends::DX9::hkReset(IDirect3DDevice9* pDevice, D3DPRESENT_PARAMETERS* pPresentationParameters)
 {
 	ImGui_ImplDX9_InvalidateDeviceObjects();
 
-	HRESULT hr = Backends::DX9::oReset(pDevice, pPresentationParameters);
+	HRESULT hr = oReset(pDevice, pPresentationParameters);
 
 	ImGui_ImplDX9_CreateDeviceObjects();
 
@@ -69,8 +72,8 @@ Backends::BackendType Backends::DX9Backend::GetType()
 void Backends::DX9Backend::InitializeBackend()
 {
 	kiero::init(kiero::RenderType::D3D9);
-	kiero::bind(42, (void**)&Backends::DX9::oEndScene, hkEndScene);
-	kiero::bind(16, (void**)&Backends::DX9::oReset, hkReset);
+	kiero::bind(42, (void**)&Backends::DX9::oEndScene, Backends::DX9::hkEndScene);
+	kiero::bind(16, (void**)&Backends::DX9::oReset, Backends::DX9::hkReset);
 }
 
 void Backends::DX9Backend::ShutdownBackend()

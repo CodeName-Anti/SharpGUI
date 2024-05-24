@@ -65,12 +65,9 @@ void Backends::ShutdownImGui()
 	igDestroyContext(nullptr);
 }
 
-void Backends::RenderGUI()
-{
-	if (Interop::renderCallback != nullptr)
-		Interop::renderCallback();
-
 #if _DEBUG
+static void DrawDebugWindow()
+{
 	static bool showGui = true;
 
 	// H is the greatest letter of all times
@@ -89,6 +86,8 @@ void Backends::RenderGUI()
 
 	igText("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
 
+	//TODO: Implement checkbox to show imgui demo window
+
 	igText("Shutdown will be fixed in a later version");
 
 	if (igButton("Shutdown", ImVec2()))
@@ -98,5 +97,50 @@ void Backends::RenderGUI()
 	}
 
 	igEnd();
+}
 #endif
+
+static void DrawInfoWindow()
+{
+	static bool infoOpen = true;
+	static const char* projectUrl = "https://github.com/CodeName-Anti/SharpGUI";
+
+	if (!infoOpen)
+		return;
+
+	if (!igBegin("SharpGUI", nullptr, NULL))
+	{
+		igEnd();
+		return;
+	}
+
+	igText("Welcome to SharpGUI, you haven't set your rendering callback, yet...");
+	igText("In the meantime here's something useful");
+
+	igSpacing();
+
+	igText("Project link: %s", projectUrl);
+	igSameLine(0.0f, -1.0f);
+	if (igButton("Copy", ImVec2()))
+	{
+		igSetClipboardText(projectUrl);
+	}
+
+	igEnd();
+}
+
+void Backends::RenderGUI()
+{
+	static bool infoOpen = true;
+
+	if (Interop::renderCallback != nullptr)
+		Interop::renderCallback();
+	else
+		// Draw an info window if no callback is set
+		DrawInfoWindow();
+
+#if _DEBUG
+	DrawDebugWindow();
+#endif
+
 }

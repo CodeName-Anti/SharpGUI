@@ -6,7 +6,8 @@
 #include "dx11_backend.hpp"
 #include "win32_backend.hpp"
 
-#include "d3d11.h"
+#include <d3d11.h>
+#include "status_util.hpp"
 #include "kiero.h"
 
 #define CIMGUI_USE_DX11
@@ -117,10 +118,10 @@ Backends::BackendType Backends::DX11Backend::GetType()
 
 void Backends::DX11Backend::InitializeBackend()
 {
-	kiero::init(kiero::RenderType::D3D11);
+	KIERO_CHECK_STATUS(kiero::init(kiero::RenderType::D3D11), "Kiero failed to init");
 
-	kiero::bind(8, (void**)&Backends::DX11::oPresent, Backends::DX11::hkPresent);
-	kiero::bind(13, (void**)&Backends::DX11::oResizeBuffers, Backends::DX11::hkResizeBuffers);
+	KIERO_CHECK_STATUS(kiero::bind(8, (void**)&Backends::DX11::oPresent, Backends::DX11::hkPresent), "Kiero failed to bind Present")
+	KIERO_CHECK_STATUS(kiero::bind(13, (void**)&Backends::DX11::oResizeBuffers, Backends::DX11::hkResizeBuffers), "Kiero failed to bind ResizeBuffers")
 }
 
 void Backends::DX11Backend::ShutdownBackend()

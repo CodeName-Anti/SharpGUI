@@ -8,6 +8,7 @@
 
 #include <dxgi1_4.h>
 #include <d3d12.h>
+#include "status_util.hpp"
 #include "kiero.h"
 
 #include <vector>
@@ -241,11 +242,11 @@ Backends::BackendType Backends::DX12Backend::GetType()
 
 void Backends::DX12Backend::InitializeBackend()
 {
-	kiero::init(kiero::RenderType::D3D12);
+	KIERO_CHECK_STATUS(kiero::init(kiero::RenderType::D3D12), "Kiero failed to init");
 
-	kiero::bind(140, (void**)&Backends::DX12::oPresent, Backends::DX12::hkPresent);
-	kiero::bind(54, (void**)&Backends::DX12::oExecuteCommandLists, Backends::DX12::hkExecuteCommandLists);
-	kiero::bind(145, (void**)&Backends::DX12::oResizeBuffers, Backends::DX12::hkResizeBuffers);
+	KIERO_CHECK_STATUS(kiero::bind(140, (void**)&Backends::DX12::oPresent, Backends::DX12::hkPresent), "Kiero failed to bind Present")
+	KIERO_CHECK_STATUS(kiero::bind(54, (void**)&Backends::DX12::oExecuteCommandLists, Backends::DX12::hkExecuteCommandLists), "Kiero failed to bind ExecuteCommandLists")
+	KIERO_CHECK_STATUS(kiero::bind(145, (void**)&Backends::DX12::oResizeBuffers, Backends::DX12::hkResizeBuffers), "Kiero failed to bind ResizeBuffers")
 }
 
 void Backends::DX12Backend::ShutdownBackend()

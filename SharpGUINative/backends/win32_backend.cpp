@@ -4,6 +4,7 @@
 #define CIMGUI_USE_WIN32
 #include "cimgui/cimgui_impl.h"
 
+#include "status_util.hpp"
 #include "minhook/include/MinHook.h"
 
 #include <map>
@@ -66,10 +67,6 @@ namespace Backends::Win32
 	HCURSOR WINAPI hkSetCursor(HCURSOR hCursor);
 
 	LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-	// Hooking helpers
-	void CreateAndEnableHook(LPVOID pTarget, LPVOID pDetour, LPVOID* ppOriginal);
-	void DisableAndRemoveHook(LPVOID pTarget);
 }
 
 bool Backends::Win32::IsCursorVisible()
@@ -346,17 +343,18 @@ void Backends::Win32Backend::SetHandleInput(bool handleInput)
 	}
 }
 
-void Backends::Win32::CreateAndEnableHook(LPVOID pTarget, LPVOID pDetour, LPVOID* ppOriginal)
-{
-	MH_CreateHook(pTarget, pDetour, ppOriginal);
-	MH_EnableHook(pTarget);
-}
+// Hooking helpers
+#define CREATE_HOOK(apiFuncName) MH_CreateHook(&##apiFuncName##, &hk##apiFuncName##, (void**)&o##apiFuncName##)
 
-void Backends::Win32::DisableAndRemoveHook(LPVOID pTarget)
-{
-	MH_DisableHook(pTarget);
-	MH_RemoveHook(pTarget);
-}
+#define HOOK_ERROR_MESSAGE(action, method) "Failed to " action " " #method " hook"
+
+#define CREATE_AND_ENABLE_HOOK(apiFuncName)														\
+MH_CHECK_STATUS(CREATE_HOOK(apiFuncName), HOOK_ERROR_MESSAGE("create", apiFuncName))			\
+MH_CHECK_STATUS(MH_EnableHook(&##apiFuncName##), HOOK_ERROR_MESSAGE("enable", apiFuncName))
+
+#define DISABLE_AND_REMOVE_HOOK(apiFuncName)													\
+MH_CHECK_STATUS(MH_DisableHook(&##apiFuncName##), HOOK_ERROR_MESSAGE("disable", apiFuncName))	\
+MH_CHECK_STATUS(MH_RemoveHook(&##apiFuncName##), HOOK_ERROR_MESSAGE("remove", apiFuncName))
 
 void Backends::Win32::Initialize(HWND window)
 {
@@ -371,16 +369,16 @@ void Backends::Win32::Initialize(HWND window)
 
 	MH_Initialize();
 
-	CreateAndEnableHook(&GetCursorPos, &hkGetCursorPos, (void**)&oGetCursorPos);
-	CreateAndEnableHook(&SetCursorPos, &hkSetCursorPos, (void**)&oSetCursorPos);
+	CREATE_AND_ENABLE_HOOK(GetCursorPos)
+	CREATE_AND_ENABLE_HOOK(SetCursorPos)
 
-	CreateAndEnableHook(&ShowCursor, &hkShowCursor, (void**)&oShowCursor);
+	CREATE_AND_ENABLE_HOOK(ShowCursor)
 
-	CreateAndEnableHook(&ClipCursor, &hkClipCursor, (void**)&oClipCursor);
-	CreateAndEnableHook(&GetClipCursor, &hkGetClipCursor, (void**)&oGetClipCursor);
+	CREATE_AND_ENABLE_HOOK(ClipCursor)
+	CREATE_AND_ENABLE_HOOK(GetClipCursor)
 
-	CreateAndEnableHook(&GetCursor, &hkGetCursor, (void**)&oGetCursor);
-	CreateAndEnableHook(&SetCursor, &hkSetCursor, (void**)&oSetCursor);
+	CREATE_AND_ENABLE_HOOK(GetCursor)
+	CREATE_AND_ENABLE_HOOK(SetCursor)
 
 	initialized = true;
 }
@@ -402,16 +400,16 @@ void Backends::Win32::Shutdown()
 
 	ImGui_ImplWin32_Shutdown();
 
-	DisableAndRemoveHook(&GetCursorPos);
-	DisableAndRemoveHook(&SetCursorPos);
+	DISABLE_AND_REMOVE_HOOK(GetCursorPos);
+	DISABLE_AND_REMOVE_HOOK(SetCursorPos);
 
-	DisableAndRemoveHook(&ShowCursor);
+	DISABLE_AND_REMOVE_HOOK(ShowCursor);
 
-	DisableAndRemoveHook(&ClipCursor);
-	DisableAndRemoveHook(&GetClipCursor);
+	DISABLE_AND_REMOVE_HOOK(ClipCursor);
+	DISABLE_AND_REMOVE_HOOK(GetClipCursor);
 
-	DisableAndRemoveHook(&GetCursor);
-	DisableAndRemoveHook(&SetCursor);
+	DISABLE_AND_REMOVE_HOOK(GetCursor);
+	DISABLE_AND_REMOVE_HOOK(SetCursor);
 
 	Backends::Win32::window = NULL;
 	initialized = false;

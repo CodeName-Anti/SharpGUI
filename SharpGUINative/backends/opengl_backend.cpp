@@ -9,6 +9,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
+#include "status_util.hpp"
 #include "minhook/include/MinHook.h"
 
 #define CIMGUI_USE_OPENGL2
@@ -18,7 +19,7 @@
 #define IMGL3W_IMPL
 #include "cimgui/imgui_impl_opengl3_loader.h"
 
-#include "Logger/Logger.h"
+#include "logger.hpp"
 
 #define GL_SHADING_LANGUAGE_VERSION 0x8B8C
 
@@ -50,15 +51,22 @@ bool __stdcall Backends::OpenGL::hkWglSwapBuffers(HDC hDc)
 
 		window = WindowFromDC(hDc);
 
-		Backends::InitImGui();
-		Backends::Win32::Initialize(Backends::OpenGL::window);
 
 		int res = imgl3wInit();
 
 		if (res != 0)
 		{
-			Log::Log("loader cant init code: " + res);
+			window = nullptr;
+
+			return oWglSwapBuffers(hDc);
+
+#if !SHARPGUI_DISABLE_CONSOLE
+			Log::LogLine("loader cant init code: " + res);
+#endif
 		}
+
+		Backends::InitImGui();
+		Backends::Win32::Initialize(Backends::OpenGL::window);
 
 		GLint iMajor;
 		GLint iMinor;
@@ -127,19 +135,18 @@ void Backends::OpenGLBackend::InitializeBackend()
 {
 	Backends::OpenGL::swapBuffersAddress = Backends::OpenGL::GetWglSwapBuffers();
 
-	MH_Initialize();
+	MH_CHECK_STATUS(MH_Initialize(), "Minhook failed to init")
 
-	MH_CreateHook(Backends::OpenGL::swapBuffersAddress, Backends::OpenGL::hkWglSwapBuffers, (void**)&Backends::OpenGL::oWglSwapBuffers);
-	MH_EnableHook(Backends::OpenGL::swapBuffersAddress);
-
+	MH_CHECK_STATUS(MH_CreateHook(Backends::OpenGL::swapBuffersAddress, Backends::OpenGL::hkWglSwapBuffers, (void**)&Backends::OpenGL::oWglSwapBuffers), "Minhook failed to create SwapBuffers hook")
+	MH_CHECK_STATUS(MH_EnableHook(Backends::OpenGL::swapBuffersAddress), "Minhook failed to enable SwapBuffers hook")
 }
 
 void Backends::OpenGLBackend::ShutdownBackend()
 {
-	MH_DisableHook(Backends::OpenGL::swapBuffersAddress);
-	MH_RemoveHook(Backends::OpenGL::swapBuffersAddress);
+	MH_CHECK_STATUS(MH_DisableHook(Backends::OpenGL::swapBuffersAddress), "Minhook failed to disable SwapBuffers hook")
+	MH_CHECK_STATUS(MH_RemoveHook(Backends::OpenGL::swapBuffersAddress), "Minhook failed to remove SwapBuffers hook")
 
-	MH_Uninitialize();
+	MH_CHECK_STATUS(MH_Uninitialize(), "Minhook failed to uninit");
 
 	if (Backends::OpenGL::newOpenGL)
 	{

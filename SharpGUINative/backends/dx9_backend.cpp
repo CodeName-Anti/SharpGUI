@@ -6,7 +6,8 @@
 #include "dx9_backend.hpp"
 #include "win32_backend.hpp"
 
-#include "d3d9.h"
+#include <d3d9.h>
+#include "status_util.hpp"
 #include "kiero.h"
 
 #define CIMGUI_USE_DX9
@@ -71,9 +72,10 @@ Backends::BackendType Backends::DX9Backend::GetType()
 
 void Backends::DX9Backend::InitializeBackend()
 {
-	kiero::init(kiero::RenderType::D3D9);
-	kiero::bind(42, (void**)&Backends::DX9::oEndScene, Backends::DX9::hkEndScene);
-	kiero::bind(16, (void**)&Backends::DX9::oReset, Backends::DX9::hkReset);
+	KIERO_CHECK_STATUS(kiero::init(kiero::RenderType::D3D9), "Kiero failed to init");
+	
+	KIERO_CHECK_STATUS(kiero::bind(42, (void**)&Backends::DX9::oEndScene, Backends::DX9::hkEndScene), "Kiero failed to bind EndScene");
+	KIERO_CHECK_STATUS(kiero::bind(16, (void**)&Backends::DX9::oReset, Backends::DX9::hkReset), "Kiero failed to bind Reset");
 }
 
 void Backends::DX9Backend::ShutdownBackend()

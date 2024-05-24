@@ -133,7 +133,7 @@
     <ClInclude Include="sharpconfig.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Logger\logger.h">
+    <ClInclude Include="Logger\logger.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="backends\dx11_backend.hpp">
@@ -162,6 +162,12 @@
     </ClInclude>
     <ClInclude Include="backends\dx12_backend.hpp">
       <Filter>Header Files\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="magic_enum.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="status_util.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

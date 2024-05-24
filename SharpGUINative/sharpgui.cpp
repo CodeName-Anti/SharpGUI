@@ -2,7 +2,6 @@
 #include "exports.hpp"
 
 #include "sharpconfig.hpp"
-#include "kiero.h"
 #include "backends/backends.hpp"
 
 #include "backends/dx9_backend.hpp"
@@ -12,6 +11,11 @@
 #include "backends/win32_backend.hpp"
 #include "backends/opengl_backend.hpp"
 #include "backends/overlay_backend.hpp"
+
+#if !SHARPGUI_DISABLE_CONSOLE
+#include "logger.hpp"
+#include "magic_enum.hpp"
+#endif
 
 Backends::BackendType SharpGUI::GetBackendType()
 {
@@ -95,6 +99,14 @@ bool SharpGUI::Initialize(Backends::BackendType backendType)
 	if (Backends::currentBackend != nullptr && Backends::currentBackend->IsInitialized())
 		return false;
 
+#if !SHARPGUI_DISABLE_CONSOLE
+#if SHARPGUI_AUTO_OPEN_CONSOLE
+	Log::OpenConsole();
+#endif
+
+	Log::LogLine("Initializing SharpGUINative with Backend: " + std::string(magic_enum::enum_name(backendType)) + ".");
+#endif
+
 	Backends::currentBackend = GetBackend(backendType);
 
 	// Check if backend is found
@@ -115,6 +127,10 @@ bool SharpGUI::Shutdown()
 {
 	if (Backends::currentBackend != nullptr && !Backends::currentBackend->IsInitialized())
 		return false;
+
+#if !SHARPGUI_DISABLE_CONSOLE
+	Log::LogLine("Shutting down SharpGUI...");
+#endif
 
 	Backends::currentBackend->Shutdown();
 

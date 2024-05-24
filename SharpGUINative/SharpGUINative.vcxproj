@@ -193,12 +193,14 @@
     <ClInclude Include="kiero\minhook\src\hde\table32.h" />
     <ClInclude Include="kiero\minhook\src\hde\table64.h" />
     <ClInclude Include="kiero\minhook\src\trampoline.h" />
-    <ClInclude Include="Logger\logger.h" />
+    <ClInclude Include="Logger\logger.hpp" />
     <ClInclude Include="backends\opengl_backend.hpp" />
     <ClInclude Include="backends\overlay_backend.hpp" />
+    <ClInclude Include="magic_enum.hpp" />
     <ClInclude Include="sharpconfig.hpp" />
     <ClInclude Include="backends\win32_backend.hpp" />
     <ClInclude Include="sharpgui.hpp" />
+    <ClInclude Include="status_util.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

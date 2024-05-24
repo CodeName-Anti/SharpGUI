@@ -6,7 +6,8 @@
 #include "dx10_backend.hpp"
 #include "win32_backend.hpp"
 
-#include "d3d10.h"
+#include <d3d10.h>
+#include "status_util.hpp"
 #include "kiero.h"
 
 #define CIMGUI_USE_DX10
@@ -113,10 +114,10 @@ Backends::BackendType Backends::DX10Backend::GetType()
 
 void Backends::DX10Backend::InitializeBackend()
 {
-	kiero::init(kiero::RenderType::D3D10);
+	KIERO_CHECK_STATUS(kiero::init(kiero::RenderType::D3D10), "Kiero failed to init");
 
-	kiero::bind(8, (void**)&Backends::DX10::oPresent, Backends::DX10::hkPresent);
-	kiero::bind(13, (void**)&Backends::DX10::oResizeBuffers, Backends::DX10::hkResizeBuffers);
+	KIERO_CHECK_STATUS(kiero::bind(8, (void**)&Backends::DX10::oPresent, Backends::DX10::hkPresent), "Kiero failed to bind Present")
+	KIERO_CHECK_STATUS(kiero::bind(13, (void**)&Backends::DX10::oResizeBuffers, Backends::DX10::hkResizeBuffers), "Kiero failed to bind ResizeBuffers")
 }
 
 void Backends::DX10Backend::ShutdownBackend()
@@ -130,7 +131,6 @@ void Backends::DX10Backend::ShutdownBackend()
 	Backends::DX10::pMainRenderTargetView->Release();
 
 	Backends::ShutdownImGui();
-
 
 	Backends::DX10::hookInit = false;
 }

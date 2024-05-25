@@ -17,5 +17,6 @@ extern "C"
 	__declspec(dllexport) void __stdcall SetInitImGuiCallback(Interop::SharpGUICallback initImGuiCallback);
 	__declspec(dllexport) void __stdcall SetRenderCallback(Interop::SharpGUICallback renderCallback);
 
+	__declspec(dllexport) bool __stdcall GetHandleInput();
 	__declspec(dllexport) void __stdcall SetHandleInput(bool handleInput);
 }

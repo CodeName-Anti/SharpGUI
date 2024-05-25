@@ -32,6 +32,11 @@ void __stdcall SetRenderCallback(Interop::SharpGUICallback renderCallback)
 	Interop::renderCallback = renderCallback;
 }
 
+bool __stdcall GetHandleInput()
+{
+	return SharpGUI::GetHandleInput();
+}
+
 void __stdcall SetHandleInput(bool handleInput)
 {
 	SharpGUI::SetHandleInput(handleInput);

@@ -11,6 +11,8 @@ public class SharpGUIBehaviour(IntPtr basePtr) : MonoBehaviour(basePtr)
 	private int counter;
 	private bool showGui;
 
+	private bool showDemoWindow;
+
 	private void Awake()
 	{
 		SGUI.OnRender += GUI_OnRender;
@@ -61,6 +63,13 @@ public class SharpGUIBehaviour(IntPtr basePtr) : MonoBehaviour(basePtr)
 			counter--;
 		}
 
+		ImGui.Checkbox("ImGui demo window", ref showDemoWindow);
+
 		ImGui.End();
+
+		if (showDemoWindow)
+		{
+			ImGui.ShowDemoWindow();
+		}
 	}
 }

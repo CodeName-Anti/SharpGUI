@@ -69,6 +69,7 @@ void Backends::ShutdownImGui()
 static void DrawDebugWindow()
 {
 	static bool showGui = true;
+	static bool showDemoWindow = false;
 
 	// H is the greatest letter of all times
 	if (igIsKeyPressed_Bool(ImGuiKey::ImGuiKey_H, false))
@@ -86,7 +87,7 @@ static void DrawDebugWindow()
 
 	igText("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
 
-	//TODO: Implement checkbox to show imgui demo window
+	igCheckbox("Demo window", &showDemoWindow);
 
 	igText("Shutdown will be fixed in a later version");
 
@@ -97,6 +98,11 @@ static void DrawDebugWindow()
 	}
 
 	igEnd();
+
+	if (showDemoWindow)
+	{
+		igShowDemoWindow(nullptr);
+	}
 }
 #endif
 
@@ -108,6 +114,9 @@ static void DrawInfoWindow()
 	if (!infoOpen)
 		return;
 
+	if (igIsKeyPressed_Bool(ImGuiKey_B, false))
+		SetHandleInput(!GetHandleInput());
+
 	if (!igBegin("SharpGUI", nullptr, NULL))
 	{
 		igEnd();
@@ -116,6 +125,7 @@ static void DrawInfoWindow()
 
 	igText("Welcome to SharpGUI, you haven't set your rendering callback, yet...");
 	igText("In the meantime here's something useful");
+	igText("Press B to toggle input");
 
 	igSpacing();
 

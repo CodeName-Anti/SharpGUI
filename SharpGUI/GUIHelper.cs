@@ -28,8 +28,6 @@ internal class GUIHelper
 	{
 		string libraryPath = Path.Combine(nativesFolder, name);
 
-		CopyResource(name, libraryPath);
-
 		if (!File.Exists(libraryPath))
 			CopyResource(name, libraryPath);
 
